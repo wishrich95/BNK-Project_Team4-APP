@@ -1,53 +1,59 @@
-/*
-  날짜 : 2025/12/15
-  내용 : 인증 관련 provider 추가
-  작성자 : 오서정
-*/
-import 'package:flutter/cupertino.dart';
-import 'package:tkbank/services/token_storage_service.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../services/token_storage_service.dart';
 
-class AuthProvider with ChangeNotifier{
+class AuthProvider extends ChangeNotifier {
+  String? _accessToken;
+  String? _refreshToken;
+  int? _userNo;  // ✅ 추가!
+  String? _userId;  // ✅ 추가!
 
-  final _tokenStorageService = TokenStorageService();
+  String? get accessToken => _accessToken;
+  String? get refreshToken => _refreshToken;
+  int? get userNo => _userNo;  // ✅ getter 추가!
+  String? get userId => _userId;  // ✅ getter 추가!
 
-  // 로그인 여부 상태
-  bool _isLoggedIn = false;
+  bool get isLoggedIn => _accessToken != null;
 
-  bool get isLoggedIn => _isLoggedIn;
+  Future<void> login(String userId, String userPw) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8080/busanbank/api/member/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'userId': userId,
+          'userPw': userPw,
+        }),
+      );
 
-  AuthProvider(){
-    // 앱 실행 시 로그인 여부 검사
-    _checkLoginStatus();
-  }
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
 
-  Future<void> _checkLoginStatus() async {
-    final token = await _tokenStorageService.readToken();
+        _accessToken = data['accessToken'];
+        _refreshToken = data['refreshToken'];
+        _userNo = data['userNo'];  // ✅ Backend에서 받아온 userNo 저장!
+        _userId = userId;
 
-    if(token != null){
-      _isLoggedIn = true;
+        // 토큰 저장
+        await TokenStorageService().saveToken(_accessToken!);
 
-      // 해당 Provider를 구독하고 있는 Consumer 알림
-      notifyListeners();
+        notifyListeners();
+      } else {
+        throw Exception('로그인 실패');
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
-  Future<void> login(String token) async {
-    await _tokenStorageService.saveToken(token);
-    _isLoggedIn = true;
+  Future<void> logout() async {
+    _accessToken = null;
+    _refreshToken = null;
+    _userNo = null;  // ✅ 로그아웃 시 초기화!
+    _userId = null;
 
-    // 해당 Provider를 구독하고 있는 Consumer 알림
+    await TokenStorageService().deleteToken();
     notifyListeners();
   }
-
-  Future<void> logout() async {
-    await _tokenStorageService.deleteToken();
-    _isLoggedIn = false;
-    notifyListeners(); // 해당 Provider를 구독하고 있는 Consumer 알림
-
-  }
-
-
-
-
-
 }

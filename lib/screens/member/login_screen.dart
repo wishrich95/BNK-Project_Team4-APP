@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         print('[DEBUG] 토큰 시작 20자: ${accessToken.substring(0, 20)}...');
 
         if (mounted) {
-          context.read<AuthProvider>().login(accessToken);
+          await context.read<AuthProvider>().login(userId, userPw);
           print('[DEBUG] AuthProvider.login() 호출 완료!');
 
           // ✅ 저장 확인
