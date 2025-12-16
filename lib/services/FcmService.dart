@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -39,10 +41,12 @@ class FcmService { // 푸시 알림 서비스
       DateTime.now().millisecondsSinceEpoch ~/ 1000,
       message.data['title'] ?? '알림',
       message.data['content'] ?? '',
-      const NotificationDetails(
+      NotificationDetails(
         android: AndroidNotificationDetails(
           'high_importance_channel',
           'High Importance Notifications',
+          icon: 'tkbank_logo',
+          color: Color(0xFF582499),
           importance: Importance.max,
           priority: Priority.high,
         ),

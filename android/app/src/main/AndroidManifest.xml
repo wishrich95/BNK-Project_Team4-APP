@@ -15,6 +15,11 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="high_importance_channel"/>
 
+        <!-- 🔥 FCM 기본 알림 아이콘 (윤종인) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/tkbank_logo"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
