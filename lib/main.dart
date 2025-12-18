@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:tkbank/providers/auth_provider.dart';
 import 'package:tkbank/providers/register_provider.dart';
+import 'package:tkbank/screens/cs/cs_support_screen.dart';
 import 'package:tkbank/services/FcmService.dart';
 import 'package:tkbank/screens/member/login_screen.dart';
 import 'package:tkbank/services/token_storage_service.dart';
@@ -10,8 +12,12 @@ import 'screens/member/coupon_screen.dart';
 import 'screens/member/point_history_screen.dart';
 import 'screens/game/game_menu_screen.dart';
 
+// 2025/12/17 - Locale 초기화 추가 - 작성자: 진원
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); //Flutter 플러그인과 플랫폼 기능을 쓰기 위한 사전 준비 작성자 : 윤종인
+
+  // 날짜 포맷팅 Locale 초기화
+  await initializeDateFormatting('ko_KR', null);
 
   await FcmService.init(); //firebase를 미리 준비 작성자 : 윤종인
 
@@ -154,30 +160,30 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // ✅ 버튼 2: 쿠폰 등록
-              // SizedBox(
-              //   width: double.infinity,
-              //   height: 56,
-              //   child: ElevatedButton.icon(
-              //     onPressed: () {
-              //       Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //           builder: (_) => CouponScreen(baseUrl: baseUrl),
-              //         ),
-              //       );
-              //     },
-              //     icon: const Icon(Icons.card_giftcard),
-              //     label: const Text(
-              //       '쿠폰 등록',
-              //       style: TextStyle(fontSize: 18),
-              //     ),
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: const Color(0xFFE91E63),
-              //       foregroundColor: Colors.white,
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CouponScreen(baseUrl: baseUrl),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.card_giftcard),
+                  label: const Text(
+                    '쿠폰 등록',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE91E63),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // ✅ 버튼 3: 포인트 이력
               SizedBox(
@@ -221,6 +227,31 @@ class HomeScreen extends StatelessWidget {
                   icon: const Icon(Icons.games),
                   label: const Text(
                     '금융게임',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF9C27B0),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),const SizedBox(height: 16),
+
+              // ✅ 버튼 : 고객센터
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CustomerSupportScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.games),
+                  label: const Text(
+                    '고객센터',
                     style: TextStyle(fontSize: 18),
                   ),
                   style: ElevatedButton.styleFrom(

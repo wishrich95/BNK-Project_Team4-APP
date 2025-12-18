@@ -5,12 +5,8 @@
 */
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:tkbank/models/term.dart';
-import 'package:tkbank/models/users.dart';
-import 'package:tkbank/providers/register_provider.dart';
 
 
 class MemberService{
@@ -114,6 +110,22 @@ class MemberService{
     return data['isMatched'] == true;
   }
 
+  /// 🔹 중복 검사 (userId / email / hp)
+  Future<bool> isDuplicated({
+    required String type,
+    required String value,
+  }) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/member/$type/$value'),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception('중복 검사 실패');
+    }
+
+    final data = jsonDecode(res.body);
+    return data['count'] > 0;
+  }
 
 
 }
