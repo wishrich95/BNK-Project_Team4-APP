@@ -17,6 +17,7 @@ import 'package:tkbank/screens/product/join/join_step3_screen.dart';
 import 'package:tkbank/screens/product/join/join_step2_screen.dart';
 import 'package:tkbank/models/product_join_request.dart';
 import 'screens/my_page/my_page_screen.dart';
+import 'package:tkbank/screens/chatbot/chatbot_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -266,6 +267,39 @@ class HomeScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF9C27B0),
                       foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 2025/12/19 - 챗봇 연동 테스트 페이지 이동 추가 - 작성자: 오서정
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChatbotScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.smart_toy_outlined),
+                    label: const Text(
+                      '챗봇 테스트(임시)',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9C27B0),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 4,
                     ),
                   ),
                 ),
