@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:tkbank/providers/auth_provider.dart';
 import 'package:tkbank/providers/register_provider.dart';
 import 'package:tkbank/screens/camera/vision_test_screen.dart';
+import 'package:tkbank/screens/chatbot/chatbot_screen.dart';
 import 'package:tkbank/screens/cs/cs_support_screen.dart';
 import 'package:tkbank/screens/product/news_analysis_screen.dart';
 import 'package:tkbank/services/FcmService.dart';
