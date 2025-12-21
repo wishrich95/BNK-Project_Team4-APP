@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/news_analysis_result.dart';
+import '../../services/product_service.dart';
 import '../product/product_detail_screen.dart';
 import '../../models/product.dart';
 
@@ -466,50 +467,29 @@ class NewsResultScreen extends StatelessWidget {
   }
 
 // ✅ 상품 상세 화면으로 이동
-  void _navigateToProductDetail(BuildContext context, RecommendedProduct product) {
-    final productModel = Product(
-      // 기본 정보
-      productNo: product.productNo,
-      name: product.productName,
-      description: product.description ?? '',
-      type: '01',  // 예금으로 가정
+  void _navigateToProductDetail(
+      BuildContext context,
+      RecommendedProduct product,
+      ) async {
+    final service = ProductService(baseUrl);
 
-      // 금리 정보
-      baseRate: product.maturityRate ?? 0.0,
-      maturityRate: product.maturityRate ?? 0.0,
-      earlyTerminateRate: 0.0,
+    try {
+      final detail = await service.fetchProductDetail(product.productNo);
 
-      // 기타 필수 필드 (기본값)
-      categoryId: 0,
-      savingTerm: 12,
-      interestMethod: '단리',
-      payCycle: '만기일시지급',
-      endDate: '2026-12-31',
-      adminId: 1,
-      createdAt: DateTime.now().toIso8601String(),
-      status: 'A',
-      subscriberCount: 0,
-      hit: 0,
-
-      // Optional 필드 (null 가능)
-      categoryName: null,
-      monthlyAmount: null,
-      depositAmount: null,
-      updatedAt: null,
-      joinTypes: null,
-      joinTypesStr: null,
-      productFeatures: null,
-    );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ProductDetailScreen(
-          baseUrl: baseUrl,
-          product: productModel,
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(
+            baseUrl: baseUrl,
+            product: detail, // ✅ joinTypes 포함
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('상품 정보를 불러오지 못했습니다')),
+      );
+    }
   }
 
 
