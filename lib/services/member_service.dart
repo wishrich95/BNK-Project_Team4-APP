@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:tkbank/models/simple_login_result.dart';
 import 'package:tkbank/models/term.dart';
 import '../models/user_profile.dart';
 import 'token_storage_service.dart';
@@ -320,5 +321,24 @@ class MemberService{
       throw Exception('회원 탈퇴 실패');
     }
   }
+
+  // 2025/12/21 - 간편 로그인 기능 추가 - 작성자: 오서정
+  Future<SimpleLoginResult> simpleLogin(String userId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/member/simple-login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return SimpleLoginResult.fromJson(json);
+    } else {
+      throw Exception('간편 로그인 실패');
+    }
+  }
+
 }
 
