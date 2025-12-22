@@ -2,11 +2,20 @@ import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../firebase_options.dart';
+import '../main.dart';
+import '../navigator_key.dart';
+import '../screens/camera/vision_test_screen.dart';
+import '../screens/game/game_menu_screen.dart';
+import '../screens/product/news_analysis_screen.dart';
+import '../screens/product/product_main_screen.dart';
 import 'fcm_background_handler.dart';
 
 class FcmService { // 푸시 알림 서비스
+  static const String baseUrl = 'http://192.168.0.212:8080/busanbank/api';
+
   static final FlutterLocalNotificationsPlugin _local =
   FlutterLocalNotificationsPlugin();
 
@@ -63,13 +72,23 @@ class FcmService { // 푸시 알림 서비스
           priority: Priority.high,
         ),
       ),
+      payload: message.data['route'], //추가사항
     );
   }
 
   // 🔹 로컬 알림 채널
   static void _initLocalNotification() {
     const init = AndroidInitializationSettings('@mipmap/ic_launcher');
-    _local.initialize(const InitializationSettings(android: init));
+    _local.initialize(const InitializationSettings(android: init),
+      onDidReceiveNotificationResponse:(response) { //추가사항
+        final route = response.payload;
+
+        if (route == null || route.isEmpty) {
+          return;
+        }
+
+        _handleNotificationClick(route);
+    });
 
     const channel = AndroidNotificationChannel(
       'high_importance_channel_v2',
@@ -81,5 +100,38 @@ class FcmService { // 푸시 알림 서비스
         .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
+  }
+
+  static void _handleNotificationClick(String route) {
+    switch(route) {
+      case '/product' :
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const ProductMainScreen(baseUrl: baseUrl)),
+        ); // 지금 가입하면 혜택있는 상품이 있어요 - 고객님께 적합한 상품을 확인해 보세요.
+        break;
+
+      case '/ai' :
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const NewsAnalysisMainScreen(baseUrl: baseUrl)),
+        ); // 오늘의 금융 알림 - AI가 분석한 최신 금리 동향을 확인해보세요
+        break;
+
+      case '/event':
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const GameMenuScreen(baseUrl: baseUrl)),
+        ); // 포인트를 모아 금리 혜택을 받아보세요 - 게임 이벤트로 포인트를 적립할 수 있어요
+        break;
+
+      case '/camera':
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const VisionTestScreen()),
+        ); // 오늘의 미션 도착 - 주변 은행 로고를 촬영하고 포인트를 받아보세요
+        break;
+
+      default:
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const HomeScreen(baseUrl: baseUrl)),
+        );
+    }
   }
 }
