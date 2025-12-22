@@ -5,10 +5,15 @@
 */
 import 'package:flutter/material.dart';
 import 'package:tkbank/services/pin_storage_service.dart';
+import 'package:tkbank/widgets/pin_dots.dart';
 
 const Color bnkPrimary = Color(0xFF6A1B9A);
 const Color bnkPrimarySoft = Color(0xFFF3E5F5);
 const Color bnkGray = Color(0xFF9CA3AF);
+const Color pinPanelColor = bnkPrimary;        // 메인 보라
+const Color pinTextColor = Colors.white;
+const Color pinSubTextColor = Colors.white70;
+
 
 class PinRegisterScreen extends StatefulWidget {
   const PinRegisterScreen({super.key});
@@ -112,7 +117,7 @@ class _PinRegisterScreenState extends State<PinRegisterScreen> {
 
           const SizedBox(height: 24),
 
-          _PinDots(length: _currentPin.length),
+          PinDots(length: _currentPin.length),
 
           if (_error != null) ...[
             const SizedBox(height: 16),
@@ -133,30 +138,6 @@ class _PinRegisterScreenState extends State<PinRegisterScreen> {
     );
   }
 }
-class _PinDots extends StatelessWidget {
-  final int length;
-  const _PinDots({required this.length});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(6, (i) {
-        final filled = i < length;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: filled ? bnkPrimary : Colors.grey.shade300,
-          ),
-        );
-      }),
-    );
-  }
-}
 
 class _PinKeyPad extends StatelessWidget {
   final Function(String) onTap;
@@ -170,39 +151,70 @@ class _PinKeyPad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final keys = [
-      '1','2','3',
-      '4','5','6',
-      '7','8','9',
-      '','0','←'
+      ['1','4','9'],
+      ['2','5','8'],
+      ['7','6','3'],
+      ['','0','del'],
     ];
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: GridView.builder(
-        shrinkWrap: true,
-        itemCount: keys.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+    return SafeArea(
+      top: false,
+      child: Container(
+        width: double.infinity, // ⭐ 패널 풀폭
+        padding: const EdgeInsets.fromLTRB(12, 24, 12, 32),
+        decoration: const BoxDecoration(
+          color: bnkPrimary,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(24),
+          ),
         ),
-        itemBuilder: (_, i) {
-          final key = keys[i];
-          if (key == '') return const SizedBox();
-          return ElevatedButton(
-            onPressed: () {
-              if (key == '←') {
-                onDelete();
-              } else {
-                onTap(key);
-              }
-            },
-            child: Text(
-              key,
-              style: const TextStyle(fontSize: 22),
-            ),
-          );
-        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: keys.map((row) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: row.map((key) {
+                  if (key == '') {
+                    return const SizedBox(width: 80);
+                  }
+
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (key == 'del') {
+                        onDelete();
+                      } else {
+                        onTap(key);
+                      }
+                    },
+                    child: SizedBox(
+                      width: 80,   // ⭐ 넓이 업
+                      height: 56,  // ⭐ 높이 업
+                      child: Center(
+                        child: key == 'del'
+                            ? const Icon(
+                          Icons.backspace_outlined,
+                          color: Colors.white,
+                          size: 26,
+                        )
+                            : Text(
+                          key,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
