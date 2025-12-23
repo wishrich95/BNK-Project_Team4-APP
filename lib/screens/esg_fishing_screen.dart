@@ -247,17 +247,38 @@ class _EsgFishingScreenState extends State<EsgFishingScreen>
       final userNo = authProvider.userNo;
 
       if (userNo == null) {
-        print('로그인이 필요합니다');
+        print('[ESG 낚시] 로그인이 필요합니다');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('로그인이 필요합니다'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         return;
       }
 
-      await _fishingService.submitFishingResult(
+      print('[ESG 낚시] 포인트 저장 시작 - userId: $userNo, trashType: ${_currentTrash!.type}, points: ${_currentTrash!.points}');
+
+      final result = await _fishingService.submitFishingResult(
         userId: userNo.toString(),
         trashType: _currentTrash!.type,
         points: _currentTrash!.points,
       );
+
+      print('[ESG 낚시] 포인트 저장 성공 - 응답: $result');
     } catch (e) {
-      print('결과 제출 실패: $e');
+      print('[ESG 낚시] 포인트 저장 실패 - 에러: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('포인트 저장 실패: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
