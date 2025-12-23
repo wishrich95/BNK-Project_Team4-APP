@@ -842,7 +842,8 @@ class _JoinStep3ScreenState extends State<JoinStep3Screen> {
         },
         orElse: () => _coupons.first,
       );
-      selectedCouponUcNo = coupon.ucNo;
+      // ✅ ucNo가 0이면 null로 처리 (백엔드에서 0을 유효한 쿠폰 ID로 인식하지 못함)
+      selectedCouponUcNo = coupon.ucNo != 0 ? coupon.ucNo : null;
     }
 
     print('[DEBUG] 📊 최종 금리:');

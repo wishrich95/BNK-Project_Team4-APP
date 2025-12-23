@@ -4,8 +4,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/api_config.dart';
 import '../models/trash.dart';
+import 'token_storage_service.dart';
 
 class FishingService {
+  final TokenStorageService _tokenStorage = TokenStorageService();
   // 랜덤 쓰레기 가져오기
   Future<Trash> getRandomTrash() async {
     try {
@@ -31,23 +33,41 @@ class FishingService {
     required int points,
   }) async {
     try {
+      final url = '${ApiConfig.baseUrl}/api/flutter/fishing/submit';
+      final requestBody = {
+        'userId': userId,
+        'trashType': trashType,
+        'points': points,
+        'catchTime': DateTime.now().toIso8601String(),
+      };
+
+      // JWT 토큰 가져오기
+      final token = await _tokenStorage.readToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      };
+
+      print('[FishingService] API 호출 - URL: $url');
+      print('[FishingService] 요청 데이터: $requestBody');
+      print('[FishingService] 토큰 포함 여부: ${token != null ? "포함됨" : "누락됨"}');
+
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/api/flutter/fishing/submit'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'userId': userId,
-          'trashType': trashType,
-          'points': points,
-          'catchTime': DateTime.now().toIso8601String(),
-        }),
+        Uri.parse(url),
+        headers: headers,
+        body: json.encode(requestBody),
       );
+
+      print('[FishingService] 응답 코드: ${response.statusCode}');
+      print('[FishingService] 응답 본문: ${response.body}');
 
       if (response.statusCode == 200) {
         return json.decode(utf8.decode(response.bodyBytes));
       } else {
-        throw Exception('낚시 결과 제출 실패: ${response.statusCode}');
+        throw Exception('낚시 결과 제출 실패: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      print('[FishingService] 에러 발생: $e');
       throw Exception('낚시 결과 제출 실패: $e');
     }
   }
@@ -117,7 +137,7 @@ class FishingService {
         name: '어망',
         type: 'net',
         points: 100,
-        emoji: '🎣',
+        emoji: '🌐',
         description: '희귀 쓰레기 어망을 수거했어요!',
       ),
     ];
