@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:tkbank/models/seed_event_status.dart';
@@ -16,6 +17,8 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     final provider = context.watch<SeedEventProvider>();
     final status = provider.status;
 
@@ -38,46 +41,70 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
       ),
       body: Stack(
         children: [
-          Column(
-            children: [
-              const SizedBox(height: 20),
-              _buildGoldPriceHeader(status.todayPrice),
-              const SizedBox(height: 130),
-              /// 🌱 Lottie 영역 (Hero)
-              SizedBox(
-                height: 350, // ← 여기서 조절
-                child: Center(
-                  child: _buildLottieByState(status.uiState),
-                ),
-              ),
-              const SizedBox(height: 15),
-              /// ✍️ 텍스트 + 버튼 영역
-              Column(
-                children: [
-                  _buildStatusMessage(status),
-                  // 👇 상태별 정보 카드 추가
-                  const SizedBox(height: 35),
-                  if (status.uiState == SeedUIState.waiting)
-                    _buildWaitingInfoCard(status),
+          /// 1️⃣ 메인 화면 (스크롤 없는 반응형 이벤트 화면)
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  children: [
+                    const SizedBox(height: 20),
 
-                  if (status.uiState == SeedUIState.success ||
-                      status.uiState == SeedUIState.failedCanRetry)
-                    _buildResultHistoryCard(status),
+                    /// 🟡 금 시세 헤더
+                    _buildGoldPriceHeader(status.todayPrice),
 
-                  const SizedBox(height: 35),
-                  if (canPlantToday)
-                    _buildWideSeedButton(
-                      isLoading: provider.isLoading,
-                      onPressed: () async {
-                        await _playPlantingAnimation(provider);
-                      },
+                    const SizedBox(height: 20),
+
+                    /// 🌱 Lottie 영역 (화면 비율)
+                    Expanded(
+                      flex: 4,
+                      child: _buildLottieByState(status.uiState),
                     ),
-                ],
-              ),
-            ],
+
+                    /// ✍️ 상태 메시지
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildStatusMessage(status),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    if (status.uiState == SeedUIState.waiting)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildWaitingInfoCard(status),
+                      ),
+
+                    if (status.uiState == SeedUIState.success ||
+                        status.uiState == SeedUIState.failedCanRetry)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildResultHistoryCard(status),
+                      ),
+
+                    const Spacer(),
+
+                    /// 🌱 하단 버튼
+                    if (canPlantToday)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 32,
+                          right: 32,
+                          bottom: 35,
+                        ),
+                        child: _buildWideSeedButton(
+                          isLoading: provider.isLoading,
+                          onPressed: () async {
+                            await _playPlantingAnimation(provider);
+                          },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
 
-          /// 🌳 심기 애니메이션 오버레이
+          /// 2️⃣ 🌳 씨앗 심기 애니메이션 오버레이 (복구!)
           if (_showPlantingAnimation)
             Positioned.fill(
               child: Container(
@@ -90,8 +117,13 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
                 ),
               ),
             ),
+
+
         ],
       ),
+
+
+
     );
   }
   Widget _buildLottieByState(SeedUIState state) {
@@ -123,50 +155,123 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
     );
   }
   Future<void> _playPlantingAnimation(SeedEventProvider provider) async {
+    // 1️⃣ 심는 애니메이션 시작
     setState(() {
       _showPlantingAnimation = true;
     });
 
-    /// 🌳 애니메이션 시간 (2초 추천)
-    await Future.wait([
-      Future.delayed(const Duration(seconds: 2)),
-      provider.plantSeed(),
-    ]);
+    // 2️⃣ 충분히 보여주기 (UX용)
+    await Future.delayed(const Duration(milliseconds: 6000));
 
     if (!mounted) return;
 
+    // 3️⃣ 서버에 심기 요청 → WAIT 상태로 변경
+    await provider.plantSeed();
+
+    if (!mounted) return;
+
+    // 4️⃣ 애니메이션 종료 → WAIT 화면 노출
     setState(() {
       _showPlantingAnimation = false;
     });
   }
 
+
   Widget _buildStatusMessage(SeedEventStatus status) {
     switch (status.uiState) {
       case SeedUIState.success:
-        return const Text(
-          '🌟 축하해요! 황금 열매가 열렸어요!\n쿠폰함을 확인해 주세요.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        return Column(
+          children: const [
+            Text(
+              '금 열매가 열렸어요 🌟',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '쿠폰함에서 보상을 확인해 보세요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+          ],
         );
 
       case SeedUIState.waiting:
-        return const Text(
-          '🌱 씨앗을 심었어요!\n결과는 다음 금 시세 반영 후 확인할 수 있어요.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
+        return Column(
+          children: const [
+            Text(
+              '씨앗을 심었어요 🌱',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '내일 금 시세가 반영되면\n결과를 확인할 수 있어요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+                height: 1.4,
+              ),
+            ),
+          ],
         );
 
       case SeedUIState.failedCanRetry:
-        return const Text(
-          '🌿 일반 열매가 자랐어요.\n다시 씨앗을 심어볼까요?',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
+        return Column(
+          children: const [
+            Text(
+              '이번엔 일반 열매였어요 🌿',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '다시 씨앗을 심고\n금 열매에 도전해 보세요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+                height: 1.4,
+              ),
+            ),
+          ],
         );
 
       case SeedUIState.canPlant:
-        return const Text(
-          '오늘의 씨앗을 아직 심지 않았어요. 🌱\n씨앗을 심으면 내일 금 시세를 예측할 수 있어요.',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        return Column(
+          children: const [
+            Text(
+              '오늘의 씨앗을 심어보세요 🌱',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '씨앗을 심고 내일 금 시세를 맞히면\n금 열매가 열려요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+                height: 1.4,
+              ),
+            ),
+          ],
         );
     }
   }
@@ -234,11 +339,11 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1), // 아주 연한 골드
+        color: const Color(0xFFFFF8E1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
-        '🟡 오늘의 금 시세 $price원',
+        '🟡 오늘의 금 시세 ${formatUsd(price)}',
         style: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
@@ -247,6 +352,7 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
       ),
     );
   }
+
 
   Widget _buildWaitingInfoCard(SeedEventStatus status) {
     return Container(
@@ -267,7 +373,7 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
           const SizedBox(height: 8),
           Text('오차 범위: ±${status.errorRate}%'),
           Text(
-            '예측 금액: ${status.minPrice} ~ ${status.maxPrice}원',
+            '예측 금액: ${formatUsd(status.minPrice)} ~ ${formatUsd(status.maxPrice)}',
           ),
         ],
       ),
@@ -275,7 +381,7 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
   }
 
   Widget _buildResultHistoryCard(SeedEventStatus status) {
-    final isSuccess = status.todayResult == SeedResult.success;
+    final isSuccess = status.uiState == SeedUIState.success;
 
     return Container(
       margin: const EdgeInsets.only(top: 16),
@@ -301,11 +407,14 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
           ),
           const SizedBox(height: 8),
           Text('오차 범위: ±${status.errorRate}%'),
-          Text('예측 금액: ${status.minPrice} ~ ${status.maxPrice}원'),
           Text(
-            '실제 금 시세: ${status.todayPrice}원',
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            '예측 금액: ${formatUsd(status.minPrice)} ~ ${formatUsd(status.maxPrice)}',
           ),
+          if (status.resultPrice != null)
+            Text(
+              '실제 금 시세: ${formatUsd(status.resultPrice)}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
         ],
       ),
     );
@@ -313,5 +422,15 @@ class _SeedEventScreenState extends State<SeedEventScreen> {
 
 
 
+
 }
 
+String formatUsd(num? price) {
+  if (price == null) return '-';
+
+  return NumberFormat.currency(
+    locale: 'en_US',
+    symbol: '\$',
+    decimalDigits: 2,
+  ).format(price);
+}

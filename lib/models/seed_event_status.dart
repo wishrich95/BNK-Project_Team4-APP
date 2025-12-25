@@ -8,6 +8,7 @@ enum SeedUIState {
 class SeedEventStatus  {
   final String todayStatus; // NONE / WAIT / SUCCESS / FAIL
   final String pastStatus;
+  final double? resultPrice;
   final double? minPrice;
   final double? maxPrice;
   final double todayPrice;
@@ -22,6 +23,7 @@ class SeedEventStatus  {
     this.maxPrice,
     this.errorRate,
     this.errorAmount,
+    this.resultPrice
   });
 
   factory SeedEventStatus.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class SeedEventStatus  {
       todayStatus: json['todayStatus'],
       pastStatus: json['pastStatus'],
       todayPrice: (json['todayPrice'] as num).toDouble(),
+      resultPrice: json['resultPrice'] != null ? (json['resultPrice'] as num).toDouble() : null,
       minPrice: json['minPrice'] != null ? (json['minPrice'] as num).toDouble() : null,
       maxPrice: json['maxPrice'] != null ? (json['maxPrice'] as num).toDouble() : null,
       errorRate: json['errorRate'] != null ? (json['errorRate'] as num).toDouble() : null,
