@@ -725,7 +725,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           }),
                         ],
 
-                        _tossMenuButton('OCR 테스트', Icons.camera_alt, () {
+                        _tossMenuButton('로고 인증 이벤트', Icons.camera_alt, () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
