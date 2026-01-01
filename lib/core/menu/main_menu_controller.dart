@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 class MainMenuController extends ChangeNotifier {
   final ScrollController scrollController = ScrollController();
   final int totalCount;
+  final double itemWidth;
 
   int activeIndex = 0;
 
-  MainMenuController({required this.totalCount}) {
+  MainMenuController({
+    required this.totalCount,
+    required this.itemWidth,
+  }) {
     scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
-    final index = (scrollController.offset / 200).round();
+    final index = (scrollController.offset / itemWidth).round();
 
     if (index != activeIndex && index >= 0 && index < totalCount) {
       activeIndex = index;

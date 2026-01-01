@@ -18,6 +18,7 @@ import '../screens/product/news_analysis_screen.dart';
 import '../screens/product/product_main_screen.dart';
 import 'bitcoin_service.dart';
 import 'fcm_background_handler.dart';
+import 'package:tkbank/screens/home/easy_home_screen.dart';
 
 class FcmService { // 푸시 알림 서비스
   static final BitcoinService _bitcoinService = BitcoinService();
@@ -224,7 +225,7 @@ class FcmService { // 푸시 알림 서비스
 
       default:
         navigatorKey.currentState?.push(
-          MaterialPageRoute(builder: (_) => const HomeScreen(baseUrl: baseUrl)),
+          MaterialPageRoute(builder: (_) => const EasyHomeScreen(baseUrl: baseUrl)),
         );
     }
   }

@@ -32,10 +32,11 @@ class _HomeMenuBarState extends State<HomeMenuBar> {
   @override
   void initState() {
     super.initState();
-    menus = MainMenuConfig.getMenus(
-      type: widget.menuType,
+    menus = MainMenuConfig.getMenus(type: widget.menuType);
+    controller = MainMenuController(
+      totalCount: menus.length,
+      itemWidth: 205.0,
     );
-    controller = MainMenuController(totalCount: menus.length);
   }
 
   @override
@@ -46,7 +47,7 @@ class _HomeMenuBarState extends State<HomeMenuBar> {
 
   void _handleMenuTap(MainMenuAction action) {
     switch (action) {
-      case MainMenuAction.product:
+      case MainMenuAction.analysis:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -91,7 +92,12 @@ class _HomeMenuBarState extends State<HomeMenuBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: AppColors.gray1,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -118,17 +124,17 @@ class _HomeMenuBarState extends State<HomeMenuBar> {
                 const Text(
                   '추천 메뉴',
                   style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary
                   ),
                 ),
                 Text(
                   controller.progressText,
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.gray4
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.gray4
                   ),
                 ),
               ],
@@ -164,15 +170,15 @@ class _HomeMenuBarState extends State<HomeMenuBar> {
         onTap: () => _handleMenuTap(item.action),
         borderRadius: BorderRadius.circular(15),
         child: Container(
-          width: 180,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          width: 190,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           decoration: BoxDecoration(
             color: isActive ? AppColors.primary : AppColors.white,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
                 color: AppColors.black.withOpacity(0.2),
-                blurRadius: 8,
+                blurRadius: 6,
               ),
             ],
           ),
@@ -183,14 +189,16 @@ class _HomeMenuBarState extends State<HomeMenuBar> {
                 size: 30,
                 color: isActive ? AppColors.white : AppColors.primary,
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 6),
               Expanded(
-                child: Text(
-                  item.label,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: isActive ? AppColors.white : AppColors.black,
+                child: Center(
+                  child: Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: isActive ? AppColors.white : AppColors.black,
+                    ),
                   ),
                 ),
               ),

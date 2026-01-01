@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum MainMenuAction {
-  product,
+  analysis,
   calculator,
   game,
   cs,
