@@ -12,9 +12,9 @@ class MainMenuConfig {
   }) {
     final commonMenus = [
       const MainMenuItem(
-        label: '상품 보기',
-        icon: Icons.shopping_bag,
-        action: MainMenuAction.product,
+        label: 'AI 뉴스 분석',
+        icon: Icons.auto_awesome,
+        action: MainMenuAction.analysis,
       ),
       const MainMenuItem(
         label: '금리계산기',
