@@ -28,6 +28,10 @@ import 'screens/product/interest_calculator_screen.dart';  // ✅ 추가!
 import 'package:camera/camera.dart'; // 25.12.23 천수빈
 import 'package:permission_handler/permission_handler.dart'; // 25.12.23 천수빈
 import 'package:model_viewer_plus/model_viewer_plus.dart'; // 25.12.23 천수빈
+import 'package:tkbank/theme/app_colors.dart'; // 25.12.30 천수빈
+import 'package:tkbank/widgets/home_menu_bar.dart'; // 25.12.30 천수빈
+import 'package:tkbank/core/menu/main_menu_config.dart'; // 25.12.30 천수빈
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +68,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF6A1B9A),
+        colorSchemeSeed: AppColors.white, // [25.12.29] 전체 배경 연보라색 제거 - 수빈
 
         // 👇 전체 앱에 폰트 적용!
         fontFamily: 'Pretendard',
@@ -195,7 +199,17 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_step == 1) _buildQuestion(),
 
           // 하단 슬라이드 메뉴
-          _buildBottomMenuSection(isLoggedIn),
+          Positioned(
+            bottom: _messageInputHeight + MediaQuery.of(context).padding.bottom,
+            left: 0,
+            right: 0,
+            child: HomeMenuBar(
+              menuType: MainMenuType.normal,
+              baseUrl: widget.baseUrl,
+              onMorePressed: _showAllMenuModal,
+            ),
+          ),
+
           _buildMessageInput(),
         ],
       ),
@@ -217,10 +231,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Container(
-      color: Colors.grey[300],
+      color: AppColors.gray3,
       child: const Center(
         child: CircularProgressIndicator(
-          color: Color(0xFF6A1B9A),
+          color: AppColors.primary,
         ),
       ),
     );
@@ -283,8 +297,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         '안녕하세요. 저는 딸깍이에요!',
                         style: TextStyle(
                           fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.black,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -293,7 +307,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         '탭하여 계속',
                         style: TextStyle(
                           fontSize: 20,
-                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.gray4,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -342,8 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.black,
                       ),
                     ),
                   ),
@@ -372,14 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .bottom + 8,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          color: AppColors.white,
         ),
         child: Row(
           children: [
@@ -389,16 +397,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   hintText: '딸깍이에게 무엇이든 물어보세요.',
-                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  hintStyle: TextStyle(color: AppColors.gray4, fontSize: 16),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: AppColors.gray2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: 12,
+                    vertical: 14,
                   ),
                 ),
                 onSubmitted: (value) {
@@ -409,11 +417,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 8),
             Container(
               decoration: const BoxDecoration(
-                color: Color(0xFF6A1B9A),
+                color: AppColors.primary,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white),
+                icon: const Icon(Icons.send, color: AppColors.white),
                 onPressed: () {
                   _handleSendMessage(_messageController.text);
                 },
@@ -443,145 +451,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _focusNode.unfocus();
   }
 
-  // 🎯 하단 수평 스크롤 메뉴 섹션
-  Widget _buildBottomMenuSection(bool isLoggedIn) {
-    // 메뉴 아이템 리스트
-    final List<_MenuItem> menuItems = [
-      _MenuItem(label: '상품 보기', icon: Icons.shopping_bag, onPressed: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => ProductMainScreen(baseUrl: widget.baseUrl)));
-      }),
-      _MenuItem(label: '금리계산기', icon: Icons.calculate, onPressed: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const InterestCalculatorScreen()));
-      }),
-      _MenuItem(label: '금융 게임', icon: Icons.games, onPressed: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => GameMenuScreen(baseUrl: widget.baseUrl)));
-      }),
-      _MenuItem(label: '고객센터', icon: Icons.support_agent, onPressed: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const CustomerSupportScreen()));
-      }),
-      _MenuItem(label: '더보기', icon: Icons.more_horiz, onPressed: () {
-        _showAllMenuModal();
-      }),
-    ];
-
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
-    return Positioned(
-      bottom: _messageInputHeight + safeBottom,
-      left: 0,
-      right: 0,
-      child: Container(
-        color: Colors.white,
-
-        padding: const EdgeInsets.fromLTRB(0, 12, 0, 16),
-
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 인기 메뉴 타이틀
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '인기 메뉴',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF6A1B9A),
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 0),
-
-            // 👇 수평 스크롤 리스트!
-            SizedBox(
-              height: 88,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10, // 👈 이게 핵심
-                ),
-                itemCount: menuItems.length,
-                itemBuilder: (context, index) {
-                  final item = menuItems[index];
-                  return _buildWideMenuButton(
-                    item.icon,
-                    item.label,
-                    item.onPressed,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 수평 스크롤용 메뉴 아이템
-  Widget _buildWideMenuButton(
-      IconData icon,
-      String label,
-      VoidCallback onPressed,
-      ) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          width: 180, // 가로로 긴 직사각형
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 8,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.16),
-                blurRadius: 4,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // 아이콘 박스
-              Icon(
-                icon,
-                size: 30, // 아이콘만 단독이므로 살짝 키움
-                color: const Color(0xFF662382), // 👈 보라색
-              ),
-              const SizedBox(width: 16),
-
-              // 텍스트
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   // 더보기 모달
   void _showAllMenuModal() {
     final authProvider = context.read<AuthProvider>();
@@ -598,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 .size
                 .height * 0.85,
             decoration: const BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
@@ -609,7 +478,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.gray3,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -620,9 +489,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     '전체 메뉴',
                     style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF6A1B9A),
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -630,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // 메뉴 리스트
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
                         _tossMenuButton('금융상품 보기', Icons.shopping_bag, () {
@@ -733,7 +602,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
 
                         // 로그인/로그아웃
                         if (!isLoggedIn)
@@ -759,15 +628,15 @@ class _HomeScreenState extends State<HomeScreen> {
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(12),
-          splashColor: Colors.grey[100],
-          highlightColor: Colors.grey[100],
+          splashColor: AppColors.gray1,
+          highlightColor: AppColors.gray1,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(15),
               border: Border.all(
-                color: Colors.grey[200]!,
+                color: AppColors.gray3,
                 width: 1,
               ),
             ),
@@ -776,13 +645,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: AppColors.gray2,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
-                    color: const Color(0xFF6A1B9A),
-                    size: 24,
+                    color: AppColors.primary,
+                    size: 26,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -791,15 +660,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     label,
                     style: const TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.black,
                     ),
                   ),
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Colors.grey[400],
-                  size: 24,
+                  color: AppColors.gray4,
+                  size: 26,
                 ),
               ],
             ),
@@ -822,26 +691,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(12),
-        splashColor: const Color(0xFF6A1B9A).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+        splashColor: AppColors.primary.withOpacity(0.1),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF6A1B9A),
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.login, color: Colors.white),
+              Icon(Icons.login, color: AppColors.white),
               SizedBox(width: 8),
               Text(
                 '로그인',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.white,
                 ),
               ),
             ],
@@ -856,20 +725,59 @@ class _HomeScreenState extends State<HomeScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () async {
+
           final confirm = await showDialog<bool>(
             context: context,
             builder: (dialogContext) =>
                 AlertDialog(
-                  title: const Text('로그아웃'),
-                  content: const Text('로그아웃하시겠습니까?'),
+
+                  // 25.12.30 스타일 수정 - 수빈
+                  backgroundColor: AppColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+
+                  title: const Text(
+                    '로그아웃',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.black,
+                    ),
+                  ),
+
+                  content: const Text(
+                    '로그아웃 하시겠습니까?',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.gray5,
+                    ),
+                  ),
+
+                  actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(dialogContext, false),
-                      child: const Text('취소'),
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.red,
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(dialogContext, true),
-                      child: const Text('로그아웃'),
+                      child: const Text(
+                        '로그아웃',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.gray5,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -880,27 +788,27 @@ class _HomeScreenState extends State<HomeScreen> {
             await _logout(context);
           }
         },
-        borderRadius: BorderRadius.circular(12),
-        splashColor: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+        splashColor: AppColors.red.withOpacity(0.1),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.red, width: 1.5),
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: AppColors.red, width: 2),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.logout, color: Colors.red),
+              Icon(Icons.logout, color: AppColors.red),
               SizedBox(width: 8),
               Text(
                 '로그아웃',
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.red,
                 ),
               ),
             ],
