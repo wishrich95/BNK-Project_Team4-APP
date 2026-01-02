@@ -15,6 +15,7 @@ import 'package:tkbank/services/biometric_auth_service.dart';
 import 'package:tkbank/services/biometric_storage_service.dart';
 import 'package:tkbank/services/otp_pin_storage_service.dart';
 import 'package:tkbank/services/pin_storage_service.dart';
+import 'package:tkbank/theme/app_colors.dart';
 
 class SecurityCenterScreen extends StatefulWidget {
   const SecurityCenterScreen({super.key});
@@ -85,14 +86,12 @@ class _SecurityCenterScreenState extends State<SecurityCenterScreen> {
     }
 
     return Scaffold(
-      backgroundColor: bnkPrimarySoft,
       appBar: AppBar(
         title: const Text(
           '인증센터',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: bnkPrimary,
-        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Padding(
@@ -308,7 +307,7 @@ class _SecurityItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withOpacity(0.08),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
